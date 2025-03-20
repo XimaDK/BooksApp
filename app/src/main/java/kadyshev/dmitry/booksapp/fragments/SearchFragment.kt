@@ -3,7 +3,6 @@ package kadyshev.dmitry.booksapp.fragments
 import SnackbarUtil
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -77,11 +76,12 @@ class SearchFragment : Fragment() {
 
     private fun setupFragmentResultListener() {
         childFragmentManager.setFragmentResultListener(
-            "filter_key",
+            FilterFragment.FILTER_KEY,
             viewLifecycleOwner
         ) { _, bundle ->
-            val selectedFilters = bundle.getStringArrayList("selectedFilters") ?: ArrayList()
-            val selectedAuthor = bundle.getString("selectedAuthor") ?: ""
+            val selectedFilters =
+                bundle.getStringArrayList(FilterFragment.SELECTED_FILTERS) ?: ArrayList()
+            val selectedAuthor = bundle.getString(FilterFragment.SELECTED_AUTHOR) ?: ""
             viewModel.updateFilters(selectedFilters)
             viewModel.updateAuthor(selectedAuthor)
             showFilter(selectedFilters)
@@ -91,7 +91,7 @@ class SearchFragment : Fragment() {
         }
 
         childFragmentManager.setFragmentResultListener(
-            "filter_dismissed",
+            FilterFragment.FILTER_DISMISSED_KEY,
             viewLifecycleOwner
         ) { _, _ ->
             dimOverlay.visibility = View.INVISIBLE
@@ -102,8 +102,8 @@ class SearchFragment : Fragment() {
         binding.linearFilters.removeAllViews()
 
         val filterMap = mapOf(
-            "relevance" to "Лучшее совпадение",
-            "newest" to "По дате"
+            FilterFragment.RELEVANCE to "Лучшее совпадение",
+            FilterFragment.NEWEST to "По дате"
         )
 
         val filterButtonManager = FilterButtonManager(requireContext(), filterMap)
@@ -192,7 +192,6 @@ class SearchFragment : Fragment() {
 
         binding.searchBar.doAfterTextChanged { editable ->
             val query = editable?.toString()?.trim() ?: ""
-            // Если запрос не изменился, не запускаем повторный поиск
             if (query.isNotEmpty() && query != lastQuery) {
                 lastQuery = query
                 viewModel.searchBooks(query)
@@ -230,7 +229,6 @@ class SearchFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collectLatest { state ->
-                    Log.d("SearchFragment", state.toString())
                     when (state) {
                         is SearchFragmentState.Idle -> stateManager.showIdleState()
                         is SearchFragmentState.Loading -> stateManager.showLoadingState()
@@ -262,7 +260,6 @@ class SearchFragment : Fragment() {
         }
 
     }
-
 
     override fun onDestroy() {
         super.onDestroy()

@@ -10,10 +10,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatButton
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
-import androidx.core.view.marginBottom
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
@@ -31,7 +29,7 @@ class FilterFragment : DialogFragment() {
 
     private var _binding: FragmentFilterBinding? = null
     private val binding: FragmentFilterBinding
-        get() = _binding ?: throw RuntimeException("FragmentFilterBinding == null")
+        get() = _binding ?: throw RuntimeException(ERROR_BINDING)
 
     private val filterViewModel: FilterViewModel by viewModel()
 
@@ -49,7 +47,11 @@ class FilterFragment : DialogFragment() {
 
         setupObservers()
         setupFilterSelection()
+        setupEditText()
+        setupButtons()
+    }
 
+    private fun setupEditText() {
         binding.edSearchAuthor.doAfterTextChanged { text ->
             lifecycleScope.launch {
                 delay(500)
@@ -57,21 +59,20 @@ class FilterFragment : DialogFragment() {
                 updateApplyButtonState(text?.isNotEmpty() == true || filterViewModel.selectedFilters.value.isNotEmpty())
             }
         }
+    }
 
-
-        binding.btnApply.setOnClickListener {
+    private fun setupButtons() = with(binding) {
+        btnApply.setOnClickListener {
             setFragmentResult(
-                "filter_key",
+                FILTER_KEY,
                 bundleOf(
-                    "selectedFilters" to ArrayList(filterViewModel.getCombinedFilters()),
-                    "selectedAuthor" to filterViewModel.selectedAuthors.value
+                    SELECTED_FILTERS to ArrayList(filterViewModel.getCombinedFilters()),
+                    SELECTED_AUTHOR to filterViewModel.selectedAuthors.value
                 )
-
             )
             dismiss()
         }
-
-        binding.btnClose.setOnClickListener {
+        btnClose.setOnClickListener {
             dismiss()
         }
     }
@@ -89,7 +90,7 @@ class FilterFragment : DialogFragment() {
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
-        parentFragmentManager.setFragmentResult("filter_dismissed", Bundle())
+        parentFragmentManager.setFragmentResult(FILTER_DISMISSED_KEY, Bundle())
     }
 
     private fun setupFilterSelection() {
@@ -101,8 +102,8 @@ class FilterFragment : DialogFragment() {
         val filterText = button.text.toString()
 
         val filter = when (filterText) {
-            getString(R.string.sort_by_best_match) -> "relevance"
-            getString(R.string.sort_by_date) -> "newest"
+            getString(R.string.sort_by_best_match) -> RELEVANCE
+            getString(R.string.sort_by_date) -> NEWEST
             else -> ""
         }
 
@@ -116,7 +117,8 @@ class FilterFragment : DialogFragment() {
 
     private fun updateApplyButtonState(isEnabled: Boolean) {
 
-        binding.btnApply.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_search)
+        binding.btnApply.background =
+            ContextCompat.getDrawable(requireContext(), R.drawable.bg_search)
         binding.btnApply.backgroundTintList = ContextCompat.getColorStateList(
             requireContext(),
             if (isEnabled) R.color.blue else R.color.light_gray
@@ -151,5 +153,14 @@ class FilterFragment : DialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+    companion object {
+        const val SELECTED_AUTHOR = "selectedAuthor"
+        const val SELECTED_FILTERS = "selectedFilters"
+        const val FILTER_KEY = "filter_key"
+        const val FILTER_DISMISSED_KEY = "filter_dismissed"
+        const val NEWEST = "newest"
+        const val RELEVANCE = "relevance"
+        const val ERROR_BINDING = "FragmentFilterBinding == null"
     }
 }

@@ -13,9 +13,7 @@ class RemoteRepositoryImpl(
 
     override suspend fun fetchRemoteBooks(query: String): List<Book> {
         val response = apiService.searchBooks(query)
-        Log.d("RemoteRepositoryImpl", response.toString())
         if (response.isSuccessful) {
-            Log.d("RemoteRepositoryImpl", response.body().toString())
             return response.body()?.items?.map { item ->
                 mapper.mapDtoToBook(item)
             } ?: emptyList()

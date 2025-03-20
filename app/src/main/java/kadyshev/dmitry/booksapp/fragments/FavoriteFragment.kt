@@ -23,7 +23,7 @@ class FavoriteFragment : Fragment() {
 
     private var _binding: FragmentFavoriteBinding? = null
     private val binding: FragmentFavoriteBinding
-        get() = _binding ?: throw RuntimeException("FragmentFavoriteBinding == null")
+        get() = _binding ?: throw RuntimeException(ERROR_BINDING)
 
     private lateinit var bookAdapter: BookAdapter
     private val favoriteViewModel: FavoriteViewModel by viewModel()
@@ -39,8 +39,12 @@ class FavoriteFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-
         setupObservers()
+        setupRecyclerView()
+        return binding.root
+    }
+
+    private fun setupRecyclerView() {
         bookAdapter = BookAdapter(
             onBookClick = { book ->
                 val action = FavoriteFragmentDirections.actionFavoriteFragmentToDetailFragment(
@@ -77,11 +81,9 @@ class FavoriteFragment : Fragment() {
         binding.recyclerView.layoutManager =
             GridLayoutManager(requireContext(), 2)
         binding.recyclerView.adapter = bookAdapter
-        return binding.root
     }
 
     private fun setupObservers() {
-
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 favoriteViewModel.favoriteBooksState.collect { state ->
@@ -99,9 +101,12 @@ class FavoriteFragment : Fragment() {
         bookAdapter.submitList(state.books)
     }
 
-
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+    }
+
+    companion object {
+        const val ERROR_BINDING = "FragmentFavoriteBinding == null"
     }
 }

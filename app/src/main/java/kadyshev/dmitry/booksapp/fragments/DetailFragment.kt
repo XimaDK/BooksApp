@@ -18,7 +18,7 @@ class DetailFragment : Fragment() {
 
     private var _binding: FragmentDetailBinding? = null
     private val binding: FragmentDetailBinding
-        get() = _binding ?: throw RuntimeException("FragmentDetailBinding == null")
+        get() = _binding ?: throw RuntimeException(ERROR_BINDING)
 
     private val viewModel: DetailViewModel by viewModel()
 
@@ -37,45 +37,63 @@ class DetailFragment : Fragment() {
         val isLiked = args.isLiked
 
         updateLikeButtonState(isLiked)
+        setupUI(bookTitle, bookAuthor, bookDescription, publishedDate, bookImgUrl)
+        setupButtons(bookImgUrl, bookTitle, bookAuthor, bookDescription, publishedDate, isLiked)
 
-        with(binding) {
-            tvTitle.text = bookTitle
-            tvAuthor.text = bookAuthor
-            tvDescription.text = bookDescription
-            tvYear.text = getString(R.string.year, publishedDate)
-            bookCover.load(bookImgUrl) {
-                crossfade(true)
-                placeholder(android.R.drawable.ic_menu_report_image)
-                error(android.R.drawable.stat_notify_error)
-            }
-            ivBack.setOnClickListener {
-                findNavController().popBackStack()
-            }
+        return binding.root
+    }
 
-            btnLike.setOnClickListener {
-                val book = Book(bookImgUrl, bookTitle, bookAuthor, bookDescription, publishedDate, isLiked)
-                viewModel.onLikeBook(book,
-                    onError = { errorMessage ->
-                        SnackbarUtil.showSnackBar(
-                            requireContext(),
-                            binding.root,
-                            errorMessage,
-                            isError = true
-                        )
-                    },
-                    onSuccess = { successMessage, isLikedAfterUpdate ->
-                        SnackbarUtil.showSnackBar(
-                            requireContext(),
-                            binding.root,
-                            successMessage,
-                            isError = false
-                        )
-                        updateLikeButtonState(isLikedAfterUpdate)
-                    }
-                )
-            }
+    private fun setupButtons(
+        bookImgUrl: String,
+        bookTitle: String,
+        bookAuthor: String,
+        bookDescription: String,
+        publishedDate: String,
+        isLiked: Boolean
+    ) = with(binding) {
+        ivBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+        btnLike.setOnClickListener {
+            val book =
+                Book(bookImgUrl, bookTitle, bookAuthor, bookDescription, publishedDate, isLiked)
+            viewModel.onLikeBook(book,
+                onError = { errorMessage ->
+                    SnackbarUtil.showSnackBar(
+                        requireContext(),
+                        binding.root,
+                        errorMessage,
+                        isError = true
+                    )
+                },
+                onSuccess = { successMessage, isLikedAfterUpdate ->
+                    SnackbarUtil.showSnackBar(
+                        requireContext(),
+                        binding.root,
+                        successMessage,
+                        isError = false
+                    )
+                    updateLikeButtonState(isLikedAfterUpdate)
+                }
+            )
+        }
+    }
 
-            return binding.root
+    private fun setupUI(
+        bookTitle: String,
+        bookAuthor: String,
+        bookDescription: String,
+        publishedDate: String,
+        bookImgUrl: String
+    ) = with(binding) {
+        tvTitle.text = bookTitle
+        tvAuthor.text = bookAuthor
+        tvDescription.text = bookDescription
+        tvYear.text = getString(R.string.year, publishedDate)
+        bookCover.load(bookImgUrl) {
+            crossfade(true)
+            placeholder(android.R.drawable.ic_menu_report_image)
+            error(android.R.drawable.stat_notify_error)
         }
     }
 
@@ -90,5 +108,9 @@ class DetailFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object{
+        const val ERROR_BINDING = "FragmentDetailBinding == null"
     }
 }

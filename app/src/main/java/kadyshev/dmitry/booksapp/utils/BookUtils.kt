@@ -13,6 +13,7 @@ object BookUtils {
     private const val ERROR_REMOVE = "Ошибка при удалении из избранного"
     private const val ADDED = "Книга успешно добавлена в избранное"
     private const val REMOVED = "Книга успешно удалена из избранного"
+    private const val UNKNOWN_ERROR = "Неизвестная ошибка"
 
     fun toggleBookLike(
         book: Book,
@@ -46,7 +47,7 @@ object BookUtils {
                 }
                 updateState(updatedBook)
             } catch (e: Exception) {
-                onError("Неизвестная ошибка")
+                onError(UNKNOWN_ERROR)
             }
         }
     }

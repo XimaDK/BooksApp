@@ -1,8 +1,8 @@
 package kadyshev.dmitry.booksapp.viewModels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kadyshev.dmitry.booksapp.fragments.FilterFragment
 import kadyshev.dmitry.booksapp.states.SearchFragmentState
 import kadyshev.dmitry.booksapp.utils.BookUtils
 import kadyshev.dmitry.domain.entities.Book
@@ -50,25 +50,7 @@ class SearchViewModel(
 
         searchJob = viewModelScope.launch {
             try {
-                val authorFilter = if (authors.isNotBlank()) {
-                    "inauthor:${authors}"
-                } else {
-                    ""
-                }
-
-                val sortByFilters = mutableListOf<String>()
-                if (_selectedFilters.value.contains("relevance")) {
-                    sortByFilters.add("orderBy:relevance")
-                }
-                if (_selectedFilters.value.contains("newest")) {
-                    sortByFilters.add("orderBy:newest")
-                }
-
-                val finalQuery = buildString {
-                    append(query)
-                    if (authorFilter.isNotEmpty()) append("+$authorFilter")
-                    if (sortByFilters.isNotEmpty()) append("+${sortByFilters.joinToString("+")}")
-                }
+                val finalQuery = buildFinalQuery(query)
 
                 if (!skipDelay) {
                     delay(2000)
@@ -87,11 +69,33 @@ class SearchViewModel(
                     _state.value = SearchFragmentState.Empty
                 }
             } catch (e: Exception) {
-                Log.d("SearchFragment", e.toString())
                 if (!isActive) return@launch
                 _state.value = SearchFragmentState.Error
             }
         }
+    }
+
+    private fun buildFinalQuery(query: String): String {
+        val authorFilter = if (authors.isNotBlank()) {
+            "inauthor:${authors}"
+        } else {
+            ""
+        }
+
+        val sortByFilters = mutableListOf<String>()
+        if (_selectedFilters.value.contains(FilterFragment.RELEVANCE)) {
+            sortByFilters.add("orderBy:relevance")
+        }
+        if (_selectedFilters.value.contains(FilterFragment.NEWEST)) {
+            sortByFilters.add("orderBy:newest")
+        }
+
+        val finalQuery = buildString {
+            append(query)
+            if (authorFilter.isNotEmpty()) append("+$authorFilter")
+            if (sortByFilters.isNotEmpty()) append("+${sortByFilters.joinToString("+")}")
+        }
+        return finalQuery
     }
 
     fun onLikeBook(book: Book, onError: (String) -> Unit, onSuccess: (String) -> Unit) {

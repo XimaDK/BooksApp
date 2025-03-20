@@ -1,12 +1,12 @@
 package kadyshev.dmitry.booksapp.viewModels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kadyshev.dmitry.booksapp.utils.BookUtils
 import kadyshev.dmitry.domain.entities.Book
 import kadyshev.dmitry.domain.useCases.RemoveBooksFromDataSourceUseCase
 import kadyshev.dmitry.domain.useCases.SaveBookToDataSourceUseCase
+
 
 class DetailViewModel(
     private val saveBookToDataSourceUseCase: SaveBookToDataSourceUseCase,
@@ -27,7 +27,7 @@ class DetailViewModel(
                 } else {
                     removeBooksFromDataSourceUseCase(updatedBook)
                 }
-                onSuccess("Book updated successfully", updatedBook.isLiked)
+                onSuccess(BOOK_UPDATE, updatedBook.isLiked)
             },
             onError = { errorMessage ->
                 onError(errorMessage)
@@ -36,6 +36,9 @@ class DetailViewModel(
                 onSuccess(successMessage, book.isLiked)
             }
         )
+    }
+    companion object{
+        private const val BOOK_UPDATE = "Книга успешно обновлена"
     }
 
 }
