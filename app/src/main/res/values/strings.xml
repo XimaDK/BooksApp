@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">BooksApp</string>
+    <string name="item_search">Поиск</string>
+    <string name="item_liked">Избранное</string>
+    <string name="search">Поиск</string>
+    <string name="filters">Фильтры</string>
+    <string name="search_prompt">Введите название книги,\n которую ищете</string>
+    <string name="error_text">Ошибка выполнения запроса,\n попробуйте повторить</string>
+    <string name="empty_text">По вашему запросу ничего \n не найдено</string>
+    <string name="authors">Авторы</string>
+    <string name="author_prompt">Введите автора</string>
+    <string name="sort">Сортировать</string>
+    <string name="sort_by_date">По дате</string>
+    <string name="sort_by_best_match">Лучшее совпадение</string>
+    <string name="apply">Применить</string>
+    <string name="try_again">Попробовать еще</string>
+    <string name="year">%s г.</string>
+    <string name="description">Описание</string>
+</resources>
